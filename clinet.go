@@ -3,8 +3,7 @@ package main
 import "net/http"
 
 type Client struct {
-	Headers   map[string]string
-	Cookies   http.CookieJar
+	Cookies   []http.Cookie
 	id        int
 	Workspace string
 	Csrf      string

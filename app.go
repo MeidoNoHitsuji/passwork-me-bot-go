@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-
 	"github.com/joho/godotenv"
+	"log"
 )
 
 func init() {
@@ -17,27 +14,21 @@ func init() {
 }
 
 func main() {
-	resp, err := http.Get("http://zaza.local/test")
+	api := DefaultApi{
+		Url: "test",
+	}
 
+	request, err := api.Request("GET", "", map[string]interface{}{})
 	if err != nil {
-		log.Fatal("Err")
+		return
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Fatal("Err Close")
-		}
-	}(resp.Body)
+	fmt.Println(request)
 
-	for true {
-
-		bs := make([]byte, 1014)
-		n, err := resp.Body.Read(bs)
-		fmt.Println(string(bs[:n]))
-
-		if n == 0 || err != nil {
-			break
-		}
+	request, err = api.Request("GET", "", map[string]interface{}{})
+	if err != nil {
+		return
 	}
+
+	fmt.Println(request)
 }
