@@ -16,7 +16,7 @@ type DefaultApi struct {
 }
 
 type UserApi struct {
-	DefaultApi
+	d DefaultApi
 }
 
 func (s *DefaultApi) Request(method string, url string, data map[string]interface{}) (map[string]interface{}, error) {
@@ -62,3 +62,7 @@ func (s *DefaultApi) Request(method string, url string, data map[string]interfac
 
 	return result, nil
 }
+
+//func (s *UserApi) Authorize(login string, password string) {
+//	s.d.Request('POST')
+//}
