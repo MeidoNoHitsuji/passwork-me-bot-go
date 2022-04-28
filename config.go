@@ -1,4 +1,3 @@
 package main
 
-//const URL = "https://passwork.me"
-const URL = "http://zaza.local"
+const URL = "https://passwork.me"
