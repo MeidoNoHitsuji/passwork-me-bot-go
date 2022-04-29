@@ -23,6 +23,10 @@ func (s *Requester) Request(method string, subUrl string, data map[string]interf
 		params.Set(key, value.(string))
 	}
 
+	if len(s.Csrf) != 0 {
+		params.Set("__csrf", s.Csrf)
+	}
+
 	buffer.WriteString(params.Encode())
 
 	req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", URL, subUrl), buffer)

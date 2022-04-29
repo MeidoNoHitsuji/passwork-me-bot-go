@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
@@ -25,15 +26,25 @@ func main() {
 		api: &api,
 	}
 
-	result, err := userApi.Authorize(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
+	_, err := userApi.Authorize(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(result)
-
 	if err := client.initCsrf(); err != nil {
+		panic(err.Error())
+	}
+
+	resp := userApi.GetInfo()
+
+	if err != nil {
 		fmt.Println(err)
 	}
+
+	var b []byte
+
+	b, err = json.Marshal(resp)
+	
+	fmt.Println(string(b))
 }

@@ -22,3 +22,31 @@ func (s *UserApi) Authorize(email string, password string) (AuthorizeStruct, err
 
 	return resp, nil
 }
+
+func (s *UserApi) GetUserColors() map[string]interface{} {
+	resp, err := s.api.RequestJson("POST", "user/getUserColors", map[string]interface{}{})
+
+	if err != nil {
+		panic("[GetUserColors] " + err.Error())
+	}
+
+	return resp.(map[string]interface{})
+}
+
+func (s *UserApi) GetInfo() map[string]interface{} {
+	resp, err := s.api.RequestJson("POST", "user/getInfo", map[string]interface{}{})
+
+	if err != nil {
+		panic("[GetInfo] " + err.Error())
+	}
+
+	return resp.(map[string]interface{})
+}
+
+func (s *UserApi) CheckMasterHash(masterKey string) bool {
+	return true
+}
+
+func (s *UserApi) GetPrivateKey() {
+
+}
