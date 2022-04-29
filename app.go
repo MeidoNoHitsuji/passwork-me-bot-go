@@ -15,10 +15,14 @@ func init() {
 }
 
 func main() {
-	api := DefaultApi{}
+	api := Requester{}
+
+	client := Client{
+		api: &api,
+	}
 
 	userApi := UserApi{
-		d: &api,
+		api: &api,
 	}
 
 	result, err := userApi.Authorize(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
@@ -28,4 +32,8 @@ func main() {
 	}
 
 	fmt.Println(result)
+
+	if err := client.initCsrf(); err != nil {
+		fmt.Println(err)
+	}
 }
