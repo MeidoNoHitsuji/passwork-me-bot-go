@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 )
 
@@ -11,8 +12,32 @@ import (
 // Структура основной, где хранится основная логика.
 ///
 type Client struct {
-	api     *Requester
-	Private string
+	api      Requester
+	userApi  UserApi
+	groupApi GroupApi
+	Private  string
+}
+
+func (s *Client) init() error {
+	s.api = Requester{}
+	s.userApi = UserApi{
+		api: &s.api,
+	}
+	s.groupApi = GroupApi{
+		api: &s.api,
+	}
+
+	_, err := s.userApi.Authorize(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.initCsrf(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // initCsrf

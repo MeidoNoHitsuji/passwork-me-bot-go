@@ -38,14 +38,14 @@ func (s *UserApi) GetUserColors() map[string]interface{} {
 	return resp.(map[string]interface{})
 }
 
-func (s *UserApi) GetInfo() (UserInfoStruct, error) {
+func (s *UserApi) GetInfo() UserInfoStruct {
 	var resp UserInfoStruct
 
 	if err := s.api.RequestWithType("POST", "user/getInfo", map[string]interface{}{}, &resp); err != nil {
 		panic("[GetInfo] " + err.Error())
 	}
 
-	return resp, nil
+	return resp
 }
 
 func (s *UserApi) CheckMasterHash(masterKey string) bool {
@@ -79,17 +79,17 @@ func (s *UserApi) GetPrivateKey() map[string]interface{} {
 	return resp.(map[string]interface{})
 }
 
-func (s *GroupApi) Get() []interface{} {
+func (s *GroupApi) Get() []GroupInfo {
+
+	var resp []GroupInfo
 
 	data := map[string]interface{}{
 		"workspaceId": s.api.Workspace,
 	}
 
-	resp, err := s.api.RequestJson("POST", "groups/get", data)
-
-	if err != nil {
-		panic("[GroupApiGet] " + err.Error())
+	if err := s.api.RequestWithType("POST", "groups/get", data, &resp); err != nil {
+		panic("[GroupGet] " + err.Error())
 	}
 
-	return resp.([]interface{})
+	return resp
 }

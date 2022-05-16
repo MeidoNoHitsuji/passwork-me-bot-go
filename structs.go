@@ -76,3 +76,22 @@ type UserInfoStruct struct {
 	Bitrix24             interface{} `json:"bitrix24" gorm:"column:bitrix24"`
 	HashAlgorithm        string      `json:"hashAlgorithm" gorm:"column:hashAlgorithm"`
 }
+
+type GroupInfo struct {
+	Shared        bool   `json:"shared" gorm:"column:shared"`
+	Access        string `json:"access" gorm:"column:access"`
+	EncryptedWith string `json:"encryptedWith" gorm:"column:encryptedWith"`
+	GroupID       string `json:"groupId" gorm:"column:groupId"`
+	Name          string `json:"name" gorm:"column:name"`
+	Tree          []struct {
+		Lvl               int    `json:"lvl" gorm:"column:lvl"`
+		GroupID           string `json:"groupId" gorm:"column:groupId"`
+		Name              string `json:"name" gorm:"column:name"`
+		PasswordsCount    int    `json:"passwordsCount" gorm:"column:passwordsCount"`
+		ID                string `json:"id" gorm:"column:id"`
+		ParentID          string `json:"parentId" gorm:"column:parentId"`
+		CurrentUserAccess int    `json:"currentUserAccess" gorm:"column:currentUserAccess"`
+	} `json:"tree" gorm:"column:tree"`
+	ID              string `json:"id" gorm:"column:id"`
+	PasswordCrypted string `json:"passwordCrypted" gorm:"column:passwordCrypted"`
+}

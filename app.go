@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
-	"os"
 )
 
 func init() {
@@ -16,35 +15,17 @@ func init() {
 }
 
 func main() {
-	api := Requester{}
+	client := Client{}
 
-	client := Client{
-		api: &api,
+	if err := client.init(); err != nil {
+		panic(err)
 	}
 
-	userApi := UserApi{
-		api: &api,
-	}
-
-	_, err := userApi.Authorize(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if err := client.initCsrf(); err != nil {
-		panic(err.Error())
-	}
-
-	resp := userApi.GetInfo()
-
-	if err != nil {
-		fmt.Println(err)
-	}
+	resp := client.groupApi.Get()
 
 	var b []byte
 
-	b, err = json.Marshal(resp)
-	
+	b, _ = json.Marshal(resp)
+
 	fmt.Println(string(b))
 }
