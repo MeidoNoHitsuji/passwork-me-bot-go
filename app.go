@@ -26,4 +26,6 @@ func main() {
 	b, _ = json.Marshal(resp)
 
 	fmt.Println(string(b))
+
+	c.GroupApi.GetFullData("qwewq")
 }

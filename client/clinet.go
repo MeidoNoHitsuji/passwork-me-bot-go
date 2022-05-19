@@ -38,11 +38,11 @@ func New(email string, password string) *Client {
 	}
 
 	if err := client.UserApi.Authorize(email, password); err != nil {
-		panic("[NewClient]" + err.Error())
+		panic("[NewClient] " + err.Error())
 	}
 
 	if err := client.initCsrf(); err != nil {
-		panic("[NewClient]" + err.Error())
+		panic("[NewClient] " + err.Error())
 	}
 
 	info := client.UserApi.GetInfo()
