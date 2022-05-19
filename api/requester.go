@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bytes"
@@ -7,7 +7,20 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"passwork-me-bot-go/config"
 )
+
+// Requester
+// Дефолтная структура запросника.
+// Сохраняет куки при первом запросе.
+// Также хранит в себе csrf, и использует, если он задан.
+///
+type Requester struct {
+	Cookies   []http.Cookie
+	Id        string
+	Workspace string
+	Csrf      string
+}
 
 // Request
 // Собираем запрос и обрабатываем возможные ошибки.
@@ -29,7 +42,7 @@ func (s *Requester) Request(method string, subUrl string, data map[string]interf
 
 	buffer.WriteString(params.Encode())
 
-	req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", URL, subUrl), buffer)
+	req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", config.URL, subUrl), buffer)
 
 	if err != nil {
 		return nil, err

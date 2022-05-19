@@ -1,31 +1,15 @@
-package main
+package api
 
-import "net/http"
-
-// Requester
-// Дефолтная структура запросника.
-// Сохраняет куки при первом запросе.
-// Также хранит в себе csrf, и использует, если он задан.
-///
-type Requester struct {
-	Cookies   []http.Cookie
-	Id        string
-	Workspace string
-	Csrf      string
-}
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
 // UserApi
 // Запросник для части пользователя ("/user/{any}").
 ///
 type UserApi struct {
-	api *Requester
-}
-
-// GroupApi
-// Запросник для части групп ("/group/{any}").
-///
-type GroupApi struct {
-	api *Requester
+	Api *Requester
 }
 
 // AuthorizeStruct
@@ -77,21 +61,71 @@ type UserInfoStruct struct {
 	HashAlgorithm        string      `json:"hashAlgorithm" gorm:"column:hashAlgorithm"`
 }
 
-type GroupInfo struct {
-	Shared        bool   `json:"shared" gorm:"column:shared"`
-	Access        string `json:"access" gorm:"column:access"`
-	EncryptedWith string `json:"encryptedWith" gorm:"column:encryptedWith"`
-	GroupID       string `json:"groupId" gorm:"column:groupId"`
-	Name          string `json:"name" gorm:"column:name"`
-	Tree          []struct {
-		Lvl               int    `json:"lvl" gorm:"column:lvl"`
-		GroupID           string `json:"groupId" gorm:"column:groupId"`
-		Name              string `json:"name" gorm:"column:name"`
-		PasswordsCount    int    `json:"passwordsCount" gorm:"column:passwordsCount"`
-		ID                string `json:"id" gorm:"column:id"`
-		ParentID          string `json:"parentId" gorm:"column:parentId"`
-		CurrentUserAccess int    `json:"currentUserAccess" gorm:"column:currentUserAccess"`
-	} `json:"tree" gorm:"column:tree"`
-	ID              string `json:"id" gorm:"column:id"`
-	PasswordCrypted string `json:"passwordCrypted" gorm:"column:passwordCrypted"`
+// Authorize
+// Авторизуемся по email и password.
+// В результате получаем рабочее место и сессию в куках.
+///
+func (s *UserApi) Authorize(email string, password string) error {
+
+	data := map[string]interface{}{
+		"email":    email,
+		"password": password,
+	}
+
+	if _, err := s.Api.RequestJson("POST", "user/authorize", data); err != nil {
+		panic("[AuthorizeException] " + err.Error())
+	}
+
+	return nil
+}
+
+func (s *UserApi) GetUserColors() map[string]interface{} {
+	resp, err := s.Api.RequestJson("POST", "user/getUserColors", map[string]interface{}{})
+
+	if err != nil {
+		panic("[GetUserColors] " + err.Error())
+	}
+
+	return resp.(map[string]interface{})
+}
+
+func (s *UserApi) GetInfo() UserInfoStruct {
+	var resp UserInfoStruct
+
+	if err := s.Api.RequestWithType("POST", "user/getInfo", map[string]interface{}{}, &resp); err != nil {
+		panic("[GetInfo] " + err.Error())
+	}
+
+	return resp
+}
+
+func (s *UserApi) CheckMasterHash(masterKey string) bool {
+
+	sum := sha256.Sum256([]byte(masterKey))
+
+	data := map[string]interface{}{
+		"sha256": fmt.Sprintf("sha256:%x", sum),
+	}
+
+	resp, err := s.Api.RequestJson("POST", "user/checkMasterHash", data)
+
+	if err != nil {
+		panic("[CheckMasterHash] " + err.Error())
+	}
+
+	return resp.(map[string]interface{})["result"].(bool)
+}
+
+func (s *UserApi) GetPrivateKey() map[string]interface{} {
+	data := map[string]interface{}{
+		"workspaceId": s.Api.Workspace,
+	}
+
+	resp, err := s.Api.RequestJson("POST", "user/getPrivateKey", data)
+
+	if err != nil {
+		panic("[GetPrivateKey] " + err.Error())
+	}
+
+	return resp.(map[string]interface{})
 }

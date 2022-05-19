@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
+	"passwork-me-bot-go/client"
 )
 
 func init() {
@@ -15,13 +17,9 @@ func init() {
 }
 
 func main() {
-	client := Client{}
+	c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
 
-	if err := client.init(); err != nil {
-		panic(err)
-	}
-
-	resp := client.groupApi.Get()
+	resp := c.PasswordApi.GetRecentPasswords()
 
 	var b []byte
 
