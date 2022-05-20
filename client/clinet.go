@@ -12,11 +12,12 @@ import (
 // Структура основной, где хранится основная логика.
 ///
 type Client struct {
-	Api         *api.Requester
-	UserApi     *api.UserApi
-	GroupApi    *api.GroupApi
-	PasswordApi *api.PasswordApi
-	Private     string
+	Api          *api.Requester
+	UserApi      *api.UserApi
+	GroupApi     *api.GroupApi
+	PasswordApi  *api.PasswordApi
+	WorkspaceApi *api.WorkspaceApi
+	Private      string
 }
 
 func New(email string, password string) *Client {
@@ -34,6 +35,10 @@ func New(email string, password string) *Client {
 	}
 
 	client.PasswordApi = &api.PasswordApi{
+		Api: client.Api,
+	}
+
+	client.WorkspaceApi = &api.WorkspaceApi{
 		Api: client.Api,
 	}
 

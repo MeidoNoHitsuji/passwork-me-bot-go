@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/joho/godotenv"
 	"log"
-	"os"
-	"passwork-me-bot-go/client"
+	"passwork-me-bot-go/database"
 )
 
 func init() {
@@ -14,18 +11,22 @@ func init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
 }
 
 func main() {
-	c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
+	//c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
+	//
+	//resp := c.WorkspaceApi.GetUsers()
+	//
+	//var b []byte
+	//
+	//b, _ = json.Marshal(resp)
+	//
+	//fmt.Println(string(b))
 
-	resp := c.PasswordApi.GetRecentPasswords()
+	db := database.New()
+	database.RunMigrateScripts(db)
 
-	var b []byte
-
-	b, _ = json.Marshal(resp)
-
-	fmt.Println(string(b))
-
-	c.GroupApi.GetFullData("qwewq")
+	//database.New()
 }

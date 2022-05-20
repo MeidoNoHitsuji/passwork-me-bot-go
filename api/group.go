@@ -71,7 +71,6 @@ func (s *GroupApi) GetFullData(id string) GroupFullData {
 }
 
 func (s *GroupApi) GetFullDataWithCategory(id string, categoryId string) GroupFullData {
-
 	var resp GroupFullData
 
 	data := map[string]interface{}{
@@ -79,6 +78,7 @@ func (s *GroupApi) GetFullDataWithCategory(id string, categoryId string) GroupFu
 		"id":          id,
 		"listing":     true,
 	}
+
 	if len(categoryId) > 0 {
 		data["categoryId"] = categoryId
 	}
