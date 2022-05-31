@@ -2,9 +2,11 @@ package client
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"passwork-me-bot-go/api"
+	"passwork-me-bot-go/models"
 	"regexp"
 )
 
@@ -82,4 +84,24 @@ func (s *Client) initCsrf() error {
 	}
 
 	return errors.New("csrf not Found")
+}
+
+func (s *Client) updateUsers(db *gorm.DB) {
+	users := s.WorkspaceApi.GetUsers()
+
+	for _, user := range users {
+		db.FirstOrCreate(&models.User{
+			ServiceID: user.Id,
+		}, models.User{
+			Name:  user.Name,
+			Email: user.Email,
+		})
+	}
+}
+
+func (s *Client) UpdatePermissions(db *gorm.DB) {
+	s.updateUsers(db)
+	//UpdateFolders
+	//SelectRoles
+	//Update Permissions By Roles
 }

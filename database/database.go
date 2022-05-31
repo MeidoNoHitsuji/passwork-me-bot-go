@@ -1,48 +1,27 @@
 package database
 
 import (
-	"database/sql"
-	"embed"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/sqlite3"
-	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"passwork-me-bot-go/config"
+	"passwork-me-bot-go/models"
 )
 
-//go:embed migrations/*.sql
-var fs embed.FS
-
-func New() *sql.DB {
-	sqliteDb, err := sql.Open(config.DB["drive"], config.DB["url"])
+func New() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(config.DB["url"]), &gorm.Config{})
 	if err != nil {
-		panic("Failed to open sqlite DB")
+		panic("failed to connect database")
 	}
 
-	return sqliteDb
-}
-
-// RunMigrateScripts
-//
-// TODO: Если Drive изменится, то изменить реализацию данной функции
-func RunMigrateScripts(db *sql.DB) {
-	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
-	if err != nil {
-		panic(err)
+	ms := []interface{}{
+		&models.User{},
+		&models.Role{},
 	}
 
-	d, err := iofs.New(fs, config.MigrationsPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	m, err := migrate.NewWithInstance("iofs", d, "main", driver)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = m.Up()
-	if err != nil {
-		// ...
+	if err = db.AutoMigrate(ms...); err != nil {
+		return nil
 	}
 
+	return db
 }

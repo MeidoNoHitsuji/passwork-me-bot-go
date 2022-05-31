@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
+	"passwork-me-bot-go/client"
 	"passwork-me-bot-go/database"
 )
 
@@ -15,18 +18,12 @@ func init() {
 }
 
 func main() {
-	//c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
-	//
-	//resp := c.WorkspaceApi.GetUsers()
-	//
-	//var b []byte
-	//
-	//b, _ = json.Marshal(resp)
-	//
-	//fmt.Println(string(b))
-
+	c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
 	db := database.New()
-	database.RunMigrateScripts(db)
+	c.UpdatePermissions(db)
+
+	fmt.Println("kekw")
+	//database.RunMigrateScripts(db)
 
 	//database.New()
 }
