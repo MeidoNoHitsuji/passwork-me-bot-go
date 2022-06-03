@@ -17,6 +17,9 @@ func New() *gorm.DB {
 	ms := []interface{}{
 		&models.User{},
 		&models.Role{},
+		&models.Group{},
+		&models.RoleGroupPermissions{},
+		&models.UserGroupPermissions{},
 	}
 
 	if err = db.AutoMigrate(ms...); err != nil {

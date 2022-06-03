@@ -2,12 +2,15 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"passwork-me-bot-go/api"
+	"passwork-me-bot-go/helper"
 	"passwork-me-bot-go/models"
 	"regexp"
+	"sort"
 )
 
 // Client
@@ -99,9 +102,58 @@ func (s *Client) updateUsers(db *gorm.DB) {
 	}
 }
 
+func (s *Client) updateGroups(db *gorm.DB) {
+	groups := s.GroupApi.Get()
+
+	for _, vault := range groups {
+		db.FirstOrCreate(&models.Group{
+			GroupId: vault.ID,
+		}, models.Group{
+			Name:    vault.Name,
+			IsVault: true,
+		})
+
+		if len(vault.Tree) > 0 {
+			sort.SliceStable(vault.Tree, func(i int, j int) bool {
+				return vault.Tree[i].Lvl < vault.Tree[j].Lvl
+			})
+
+			for _, group := range vault.Tree {
+				ParentId := group.ParentID
+				if group.Lvl == 0 {
+					ParentId = vault.ID
+				}
+
+				db.FirstOrCreate(&models.Group{
+					GroupId: group.ID,
+				}, models.Group{
+					Name:     group.Name,
+					IsVault:  false,
+					ParentId: ParentId,
+				})
+			}
+		}
+	}
+
+	var listIds []string
+
+	for _, vault := range groups {
+		listIds = append(listIds, vault.ID)
+		if len(vault.Tree) > 0 {
+			for _, group := range vault.Tree {
+				listIds = append(listIds, group.ID)
+			}
+		}
+	}
+
+	listIds = helper.Unique(listIds)
+	fmt.Println(listIds)
+	db.Where("group_id not in (?)", listIds).Delete(&models.Group{})
+}
+
 func (s *Client) UpdatePermissions(db *gorm.DB) {
 	s.updateUsers(db)
-	//UpdateFolders
+	s.updateGroups(db)
 	//SelectRoles
 	//Update Permissions By Roles
 }

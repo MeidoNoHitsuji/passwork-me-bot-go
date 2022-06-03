@@ -9,4 +9,12 @@ var DB = map[string]string{
 	"password": "",
 }
 
-var MigrationsPath = "migrations"
+var LANG = map[string]string{
+	noAccess:        "No access",
+	listingAccess:   "Folder listing",
+	readAccess:      "Read only",
+	editAccess:      "Read & Edit",
+	deleteAccess:    "Full access",
+	fullAccess:      "Administrator",
+	inheritedAccess: "Inherited from parent",
+}
