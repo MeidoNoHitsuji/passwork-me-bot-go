@@ -94,7 +94,7 @@ func (s *Client) updateUsers(db *gorm.DB) {
 
 	for _, user := range users {
 		db.FirstOrCreate(&models.User{
-			ServiceID: user.Id,
+			ID: user.Id,
 		}, models.User{
 			Name:  user.Name,
 			Email: user.Email,
@@ -107,10 +107,9 @@ func (s *Client) updateGroups(db *gorm.DB) {
 
 	for _, vault := range groups {
 		db.FirstOrCreate(&models.Group{
-			GroupId: vault.ID,
+			ID: vault.ID,
 		}, models.Group{
-			Name:    vault.Name,
-			IsVault: true,
+			Name: vault.Name,
 		})
 
 		if len(vault.Tree) > 0 {
@@ -125,10 +124,9 @@ func (s *Client) updateGroups(db *gorm.DB) {
 				}
 
 				db.FirstOrCreate(&models.Group{
-					GroupId: group.ID,
+					ID: group.ID,
 				}, models.Group{
 					Name:     group.Name,
-					IsVault:  false,
 					ParentId: ParentId,
 				})
 			}
@@ -148,7 +146,7 @@ func (s *Client) updateGroups(db *gorm.DB) {
 
 	listIds = helper.Unique(listIds)
 	fmt.Println(listIds)
-	db.Where("group_id not in (?)", listIds).Delete(&models.Group{})
+	db.Where("id not in (?)", listIds).Delete(&models.Group{})
 }
 
 func (s *Client) UpdatePermissions(db *gorm.DB) {

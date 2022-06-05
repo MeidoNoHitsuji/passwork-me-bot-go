@@ -66,6 +66,14 @@ type GroupFullData struct {
 	CountAdmins int `json:"countAdmins"`
 }
 
+type UserGroup struct {
+	Id        string      `json:"id"`
+	Name      string      `json:"name"`
+	Email     string      `json:"email"`
+	PublicKey string      `json:"publicKey"`
+	Avatar    interface{} `json:"avatar"`
+}
+
 func (s *GroupApi) GetFullData(id string) GroupFullData {
 	return s.GetFullDataWithCategory(id, "")
 }
@@ -103,4 +111,21 @@ func (s *GroupApi) Get() []GroupInfo {
 	}
 
 	return resp
+}
+
+func (s *GroupApi) GetWorkspaceUsersNotInGroup(id string) []UserGroup {
+	var resp struct {
+		Users []UserGroup `json:"users"`
+	}
+
+	data := map[string]interface{}{
+		"workspaceId": s.Api.Workspace,
+		"groupId":     id,
+	}
+
+	if err := s.Api.RequestWithType("POST", "groups/getWorkspaceUsersNotInGroup", data, &resp); err != nil {
+		panic("[GroupGet] " + err.Error())
+	}
+
+	return resp.Users
 }

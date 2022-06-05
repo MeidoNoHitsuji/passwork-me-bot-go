@@ -1,11 +1,16 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type User struct {
-	gorm.Model
-	ServiceID string
+	ID        string
 	Name      string
 	Email     string
-	Roles     []Role `gorm:"many2many:user_roles;"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Roles     []Role         `gorm:"many2many:user_roles;ForeignKey:id;References:id;"`
 }

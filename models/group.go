@@ -1,28 +1,32 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Group struct {
-	gorm.Model
+	ID          string `gorm:"uniqueIndex"`
 	Name        string
-	GroupId     string `gorm:"uniqueIndex"`
 	ParentId    string
-	ParentGroup *Group `gorm:"foreignKey:ParentId;references:GroupId;"`
-	IsVault     bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	ParentGroup *Group         `gorm:"foreignKey:ParentId;references:ID;"`
 }
 
 type RoleGroupPermissions struct {
-	GroupID    int
-	Group      Group `gorm:"constraint:OnDelete:CASCADE"`
+	GroupID    string
 	RoleID     int
-	Role       Role `gorm:"constraint:OnDelete:CASCADE"`
 	Permission string
+	Group      Group `gorm:"foreignKey:GroupID;references:ID;constraint:OnDelete:CASCADE"`
+	Role       Role  `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type UserGroupPermissions struct {
-	GroupID    int
-	Group      Group `gorm:"constraint:OnDelete:CASCADE"`
-	UserID     int
-	User       User `gorm:"constraint:OnDelete:CASCADE"`
+	GroupID    string
 	Permission string
+	UserID     string
+	Group      Group `gorm:"foreignKey:GroupID;references:ID;constraint:OnDelete:CASCADE"`
+	User       User  `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`
 }
