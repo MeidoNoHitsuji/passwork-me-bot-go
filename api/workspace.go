@@ -43,7 +43,7 @@ func (s WorkspaceApi) GetUsers() []User {
 	return resp.Users
 }
 
-func (s WorkspaceApi) AddRsaEncryptedGroupToManyUsers(users []UserWithPublicKey, groupId string, groupKey string, folderId string) bool {
+func (s WorkspaceApi) AddRsaEncryptedFolderToManyUsers(users []UserWithPublicKey, groupId string, groupKey string, folderId string) bool {
 
 	var resp bool
 
@@ -65,7 +65,7 @@ func (s WorkspaceApi) AddRsaEncryptedGroupToManyUsers(users []UserWithPublicKey,
 		publicKeyHash := sha256.Sum256([]byte(user.PublicKey))
 		data.PublicKeyHash = "sha256:" + hex.EncodeToString(publicKeyHash[:])
 		data.Access = "listing"
-		data.FolderAccess = 0
+		data.FolderAccess = user.FolderAccess
 
 		Users = append(Users, *data)
 	}
@@ -82,4 +82,8 @@ func (s WorkspaceApi) AddRsaEncryptedGroupToManyUsers(users []UserWithPublicKey,
 	}
 
 	return resp
+}
+
+func (s WorkspaceApi) AddRsaEncryptedGroupToManyUsers(users []UserWithPublicKey, groupId string, groupKey string) bool {
+	return s.AddRsaEncryptedFolderToManyUsers(users, groupId, groupKey, "")
 }

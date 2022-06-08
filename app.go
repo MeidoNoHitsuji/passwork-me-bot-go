@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
+	"passwork-me-bot-go/client"
+	"passwork-me-bot-go/config"
 )
 
 func init() {
@@ -14,38 +18,36 @@ func init() {
 }
 
 func main() {
-	//c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
-	//user := c.UserApi.GetInfo()
-	//fmt.Println(user)
+	c := client.New(os.Getenv("EMAIL"), os.Getenv("PASSWORD"))
 
-	//groups := c.GroupApi.Get()
-	//
-	//groupId := "62a086ada6fe8016ee05fc54"
-	////groupId = "62a086ada6fe80165d0ac4c0"
-	//groupData := c.GroupApi.GetFullData(groupId)
-	//
-	//groupKey, _ := aes.Decrypt(
-	//	base32.Decode(groupData.Group.PasswordCrypted, true),
-	//	os.Getenv("MASTER_KEY"),
-	//)
-	//fmt.Println(groupKey)
-	//users := c.GroupApi.GetWorkspaceUsersNotInGroup(groupId)
-	//result := c.WorkspaceApi.AddRsaEncryptedGroupToManyUsers(users, groupId, groupKey, "62a086ada6fe80165d0ac4c0")
+	groupId := "62a086ada6fe8016ee05fc54"
 
-	//fmt.Println(result)
+	users := c.GroupApi.GetWorkspaceUsersNotInGroup(groupId)
+
+	if len(users) > 0 {
+		if c.AddUsersInGroup(users, groupId) {
+			fmt.Println("Пользователи добавлены")
+		} else {
+			fmt.Println("Пользователи не добавлены")
+		}
+	} else {
+		fmt.Println("Не кого добавлять")
+	}
+
+	permissions := map[string]string{}
+
+	for _, user := range users {
+		permissions[user.Id] = config.FullAccess
+	}
+
+	if c.GroupApi.UpdatePermissionsGroup(permissions, groupId) { // У категорий передются параметры в цифровом формате, а у групп в текстовом. Это надо пофиксить.
+		fmt.Println("Пермишны обновлены")
+	} else {
+		fmt.Println("Пермишны не обновлены")
+	}
 
 	//db := database.New()
 	//c.UpdatePermissions(db)
-
-	//groupKey, _ := aes.Decrypt(
-	//	base32.Decode("amt4cwv48xb6pp1h5xa7jn358h964mjpch4qev3c85t4cxbmcdhn4ca3exh54mj2a9264wjuc97m8gk8cdx54n2t8mt64y32d9x66vafahgprt2kd1j6crtmb1gm2caaf5338pbncwyku", true),
-	//	"Rdevv781!",
-	//)
-	//
-	//pubPEM := "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLlSaR+Tcmz30SBWP3QcLRiYRZ\n0rOLHnif+5kdKb81bZfsTcsfRJO3lqlK/J4hd5pM+NYypn8DTsu6hG7jJ/wBDub+\n2ukqFOyqvH1IJZhSJuvHNh4SlGAfa7Xdp8sUe+1dfWe5WGWkXvpz2txCNbqguDYH\n1ewpwVexPfWxk4Y0nwIDAQAB\n-----END PUBLIC KEY-----"
-	//ciphertext := helper.RsaEncrypt(groupKey, pubPEM)
-	//
-	//fmt.Println(ciphertext)
 
 	//fmt.Println(u.Encode())
 	//database.RunMigrateScripts(db)

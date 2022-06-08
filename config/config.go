@@ -10,11 +10,11 @@ var DB = map[string]string{
 }
 
 var LANG = map[string]string{
-	noAccess:        "No access",
-	listingAccess:   "Folder listing",
-	readAccess:      "Read only",
-	editAccess:      "Read & Edit",
-	deleteAccess:    "Full access",
-	fullAccess:      "Administrator",
-	inheritedAccess: "Inherited from parent",
+	NoAccess:        "No access",
+	ListingAccess:   "Folder listing",
+	ReadAccess:      "Read only",
+	EditAccess:      "Read & Edit",
+	DeleteAccess:    "Full access",
+	FullAccess:      "Administrator",
+	InheritedAccess: "Inherited from parent",
 }

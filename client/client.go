@@ -147,19 +147,21 @@ func (s *Client) updateGroups(db *gorm.DB) {
 	db.Where("id not in (?)", listIds).Delete(&models.Group{})
 }
 
-func (s Client) AddUsersInCategory(users api.UserWithPublicKey, groupId string, categoryId string) bool {
-	//var groupData api.GroupFullData
-	//
-	//if categoryId != "" {
-	//	groupData = s.GroupApi.GetFullDataWithCategory(groupId, categoryId)
-	//} else {
-	//	groupData = s.GroupApi.GetFullData(groupId)
-	//}
+func (s Client) AddUsersInCategory(users []api.UserWithPublicKey, groupId string, categoryId string) bool {
+	var groupData api.GroupFullData
 
-	return false
+	if categoryId != "" {
+		groupData = s.GroupApi.GetFullDataWithCategory(groupId, categoryId)
+	} else {
+		groupData = s.GroupApi.GetFullData(groupId)
+	}
+
+	groupPassword := groupData.Group.DecryptPassword()
+
+	return s.WorkspaceApi.AddRsaEncryptedFolderToManyUsers(users, groupId, groupPassword, categoryId)
 }
 
-func (s Client) AddUsersInGroup(users api.UserWithPublicKey, groupId string) bool {
+func (s Client) AddUsersInGroup(users []api.UserWithPublicKey, groupId string) bool {
 	return s.AddUsersInCategory(users, groupId, "")
 }
 
