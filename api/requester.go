@@ -1,13 +1,14 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MeidoNoHitsuji/form"
 	"net/http"
-	"net/url"
 	"passwork-me-bot-go/config"
+	"passwork-me-bot-go/helper"
+	"strings"
 )
 
 // Requester
@@ -29,20 +30,15 @@ type Requester struct {
 func (s *Requester) Request(method string, subUrl string, data map[string]interface{}) (*http.Response, error) {
 	client := http.Client{}
 
-	// Назначаем параметры
-	buffer := new(bytes.Buffer)
-	params := url.Values{}
-	for key, value := range data {
-		params.Set(key, value.(string))
-	}
-
 	if len(s.Csrf) != 0 {
-		params.Set("__csrf", s.Csrf)
+		data["__csrf"] = s.Csrf
 	}
 
-	buffer.WriteString(params.Encode())
+	// Назначаем параметры
+	params, _ := form.EncodeToValues(data)
+	params = helper.TransferToParentheses(params)
 
-	req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", config.URL, subUrl), buffer)
+	req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", config.URL, subUrl), strings.NewReader(params.Encode()))
 
 	if err != nil {
 		return nil, err
@@ -90,9 +86,12 @@ func (s *Requester) RequestJson(method string, subUrl string, data map[string]in
 	}
 
 	if result["response"] != nil {
-		switch result["response"].(type) {
+		response := result["response"]
+		switch response.(type) {
 		case bool:
-			return nil, errors.New("ResponseMessage: " + fmt.Sprintf("%v", result["errorMessage"]))
+			if !response.(bool) {
+				return nil, errors.New("ResponseMessage: " + fmt.Sprintf("%v", result["errorMessage"]))
+			}
 		}
 	}
 

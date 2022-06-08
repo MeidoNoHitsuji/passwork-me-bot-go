@@ -1,5 +1,11 @@
 package api
 
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"passwork-me-bot-go/helper"
+)
+
 // WorkspaceApi
 // Запросник для части пользователя ("/workspace/{any}").
 ///
@@ -35,4 +41,45 @@ func (s WorkspaceApi) GetUsers() []User {
 	}
 
 	return resp.Users
+}
+
+func (s WorkspaceApi) AddRsaEncryptedGroupToManyUsers(users []UserWithPublicKey, groupId string, groupKey string, folderId string) bool {
+
+	var resp bool
+
+	type EncryptUserType struct {
+		Id                          string `form:"id"`
+		GroupPasswordCryptedWithRsa string `form:"groupPasswordCryptedWithRsa"`
+		PublicKeyHash               string `form:"publicKeyHash"`
+		Access                      string `form:"access"`
+		FolderAccess                int    `form:"folderAccess"`
+	}
+
+	var Users []EncryptUserType
+
+	for _, user := range users {
+		data := new(EncryptUserType)
+
+		data.Id = user.Id
+		data.GroupPasswordCryptedWithRsa = helper.RsaEncrypt(groupKey, user.PublicKey)
+		publicKeyHash := sha256.Sum256([]byte(user.PublicKey))
+		data.PublicKeyHash = "sha256:" + hex.EncodeToString(publicKeyHash[:])
+		data.Access = "listing"
+		data.FolderAccess = 0
+
+		Users = append(Users, *data)
+	}
+
+	data := map[string]interface{}{
+		"users":       Users,
+		"workspaceId": s.Api.Workspace,
+		"groupId":     groupId,
+		"folderId":    folderId,
+	}
+
+	if err := s.Api.RequestWithType("POST", "workspace/addRsaEncryptedGroupToManyUsers", data, &resp); err != nil {
+		panic("[AddRsaEncryptedGroupToManyUsers] " + err.Error())
+	}
+
+	return resp
 }

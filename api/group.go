@@ -66,7 +66,7 @@ type GroupFullData struct {
 	CountAdmins int `json:"countAdmins"`
 }
 
-type UserGroup struct {
+type UserWithPublicKey struct {
 	Id        string      `json:"id"`
 	Name      string      `json:"name"`
 	Email     string      `json:"email"`
@@ -113,9 +113,9 @@ func (s *GroupApi) Get() []GroupInfo {
 	return resp
 }
 
-func (s *GroupApi) GetWorkspaceUsersNotInGroup(id string) []UserGroup {
+func (s *GroupApi) GetWorkspaceUsersNotInGroup(id string) []UserWithPublicKey {
 	var resp struct {
-		Users []UserGroup `json:"users"`
+		Users []UserWithPublicKey `json:"users"`
 	}
 
 	data := map[string]interface{}{

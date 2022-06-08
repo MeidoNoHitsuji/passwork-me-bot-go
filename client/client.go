@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
@@ -145,8 +144,23 @@ func (s *Client) updateGroups(db *gorm.DB) {
 	}
 
 	listIds = helper.Unique(listIds)
-	fmt.Println(listIds)
 	db.Where("id not in (?)", listIds).Delete(&models.Group{})
+}
+
+func (s Client) AddUsersInCategory(users api.UserWithPublicKey, groupId string, categoryId string) bool {
+	//var groupData api.GroupFullData
+	//
+	//if categoryId != "" {
+	//	groupData = s.GroupApi.GetFullDataWithCategory(groupId, categoryId)
+	//} else {
+	//	groupData = s.GroupApi.GetFullData(groupId)
+	//}
+
+	return false
+}
+
+func (s Client) AddUsersInGroup(users api.UserWithPublicKey, groupId string) bool {
+	return s.AddUsersInCategory(users, groupId, "")
 }
 
 func (s *Client) UpdatePermissions(db *gorm.DB) {

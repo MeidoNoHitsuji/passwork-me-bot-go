@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 )
 
 func Decrypt(cipherText string, password string) (string, error) {
@@ -19,7 +18,6 @@ func Decrypt(cipherText string, password string) (string, error) {
 	}
 
 	salt := data[8:16]
-	fmt.Println(string(salt))
 	cipherBytes := data[16:]
 	key, iv, err := DefaultEvpKDF([]byte(password), salt)
 	if err != nil {
