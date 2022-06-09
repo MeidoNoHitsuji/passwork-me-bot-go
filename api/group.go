@@ -1,9 +1,9 @@
 package api
 
 import (
-	"os"
 	"passwork-me-bot-go/aes"
 	"passwork-me-bot-go/base32"
+	"passwork-me-bot-go/config"
 )
 
 // GroupApi
@@ -88,7 +88,7 @@ type UserWithPublicKey struct {
 func (s EncrypterPassword) DecryptPassword() string {
 	groupKey, err := aes.Decrypt(
 		base32.Decode(s.PasswordCrypted, true),
-		os.Getenv("MASTER_KEY"),
+		config.MasterKey,
 	)
 
 	if err != nil {

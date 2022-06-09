@@ -8,6 +8,8 @@ import (
 	"passwork-me-bot-go/models"
 )
 
+var instant *gorm.DB
+
 func New() *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(config.DB["url"]), &gorm.Config{})
 	if err != nil {
@@ -27,4 +29,11 @@ func New() *gorm.DB {
 	}
 
 	return db
+}
+
+func Instant() *gorm.DB {
+	if instant == nil {
+		instant = New()
+	}
+	return instant
 }

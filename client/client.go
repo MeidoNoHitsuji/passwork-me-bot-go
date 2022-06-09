@@ -6,11 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"passwork-me-bot-go/api"
+	"passwork-me-bot-go/config"
 	"passwork-me-bot-go/helper"
 	"passwork-me-bot-go/models"
 	"regexp"
 	"sort"
 )
+
+var instant *Client
 
 // Client
 // Структура основной, где хранится основная логика.
@@ -62,6 +65,13 @@ func New(email string, password string) *Client {
 	return &client
 }
 
+func Instant() *Client {
+	if instant == nil {
+		instant = New(config.Email, config.Password)
+	}
+	return instant
+}
+
 // initCsrf
 // Инициализируем csrf и сохраняем его в Requester.
 ///
@@ -88,7 +98,7 @@ func (s *Client) initCsrf() error {
 	return errors.New("csrf not Found")
 }
 
-func (s *Client) updateUsers(db *gorm.DB) {
+func (s *Client) UpdateUsers(db *gorm.DB) {
 	users := s.WorkspaceApi.GetUsers()
 
 	for _, user := range users {
@@ -166,7 +176,7 @@ func (s Client) AddUsersInGroup(users []api.UserWithPublicKey, groupId string) b
 }
 
 func (s *Client) UpdatePermissions(db *gorm.DB) {
-	s.updateUsers(db)
+	s.UpdateUsers(db)
 	s.updateGroups(db)
 	//SelectRoles
 	//Update Permissions By Roles

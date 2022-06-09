@@ -1,5 +1,9 @@
 package config
 
+import (
+	"os"
+)
+
 var URL = "https://passwork.me"
 
 var DB = map[string]string{
@@ -18,3 +22,9 @@ var LANG = map[string]string{
 	FullAccess:      "Administrator",
 	InheritedAccess: "Inherited from parent",
 }
+
+var (
+	Email     = os.Getenv("EMAIL")
+	Password  = os.Getenv("PASSWORD")
+	MasterKey = os.Getenv("MASTER_KEY")
+)
