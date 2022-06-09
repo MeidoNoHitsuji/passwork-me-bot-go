@@ -1,10 +1,12 @@
 package config
 
-import (
-	"os"
-)
-
 var URL = "https://passwork.me"
+
+var (
+	Email     string
+	Password  string
+	MasterKey string
+)
 
 var DB = map[string]string{
 	"drive":    "sqlite3",
@@ -13,18 +15,11 @@ var DB = map[string]string{
 	"password": "",
 }
 
-var LANG = map[string]string{
-	NoAccess:        "No access",
-	ListingAccess:   "Folder listing",
-	ReadAccess:      "Read only",
-	EditAccess:      "Read & Edit",
-	DeleteAccess:    "Full access",
-	FullAccess:      "Administrator",
-	InheritedAccess: "Inherited from parent",
+var PermissionValue = map[string]string{
+	NoAccess:            "denied",
+	ListingAccess:       "listing",
+	ReadAccess:          "read",
+	EditAccess:          "write",
+	FullAccess:          "delete",
+	AdministratorAccess: "admin",
 }
-
-var (
-	Email     = os.Getenv("EMAIL")
-	Password  = os.Getenv("PASSWORD")
-	MasterKey = os.Getenv("MASTER_KEY")
-)

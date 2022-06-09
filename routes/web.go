@@ -9,6 +9,6 @@ func WebIndex(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("main.html")
 	err := t.Execute(w, nil)
 	if err != nil {
-		return
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 }

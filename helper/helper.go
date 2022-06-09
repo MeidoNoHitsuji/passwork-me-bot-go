@@ -22,6 +22,15 @@ func Unique(arr []string) []string {
 	return list
 }
 
+func Contains(arr []any, val any) bool {
+	for _, a := range arr {
+		if a == val {
+			return true
+		}
+	}
+	return false
+}
+
 func TransferToParentheses(values url.Values) url.Values {
 	newValues := url.Values{}
 

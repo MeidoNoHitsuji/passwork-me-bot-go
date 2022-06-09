@@ -1,12 +1,12 @@
 package main
 
 import (
-	"flag"
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 	"passwork-me-bot-go/client"
+	"passwork-me-bot-go/config"
 	"passwork-me-bot-go/database"
 	"passwork-me-bot-go/routes"
 	"time"
@@ -18,26 +18,20 @@ func init() {
 		log.Fatal("Error loading .env file")
 	}
 
+	config.Email = os.Getenv("EMAIL")
+	config.Password = os.Getenv("PASSWORD")
+	config.MasterKey = os.Getenv("MASTER_KEY")
 }
 
 func main() {
 
-	var dir string
-	flag.StringVar(&dir, "dir", "./static/", "the directory to serve files from. Defaults to the current dir")
-	flag.Parse()
-
 	c := client.Instant()
 	db := database.Instant()
 
-	c.UpdateUsers(db)
-
-	router := mux.NewRouter()
-
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
-	router.HandleFunc("/", routes.WebIndex).Methods("GET")
+	c.UpdatePermissions(db)
 
 	srv := &http.Server{
-		Handler: router,
+		Handler: routes.New(),
 		Addr:    "127.0.0.1:8000",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
@@ -46,36 +40,9 @@ func main() {
 
 	log.Fatal(srv.ListenAndServe())
 
-	//groupId := "62a086ada6fe8016ee05fc54"
-	//
-	//users := connect.GroupApi.GetWorkspaceUsersNotInGroup(groupId)
-	//
-	//if len(users) > 0 {
-	//	if connect.AddUsersInGroup(users, groupId) {
-	//		fmt.Println("Пользователи добавлены")
-	//	} else {
-	//		fmt.Println("Пользователи не добавлены")
-	//	}
-	//} else {
-	//	fmt.Println("Не кого добавлять")
-	//}
-	//
-	//permissions := map[string]string{}
-	//
-	//for _, user := range users {
-	//	permissions[user.Id] = config.FullAccess
-	//}
-	//
-	//if connect.GroupApi.UpdatePermissionsGroup(permissions, groupId) { // У категорий передются параметры в цифровом формате, а у групп в текстовом. Это надо пофиксить.
-	//	fmt.Println("Пермишны обновлены")
-	//} else {
-	//	fmt.Println("Пермишны не обновлены")
-	//}
-
-	//c.UpdatePermissions(db)
-
-	//fmt.Println(u.Encode())
-	//database.RunMigrateScripts(db)
-
-	//database.New()
+	//TODO:
+	//1. Создать роуты создания/патча ролей, патча пользователей
+	//2. Проверить работоспособность обновления прав относительно ролей
+	//3. Либо дописать веб, либо написать отдельный маленький скрипт на дёрганье api.
+	//4. Захостить боть
 }
