@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"passwork-me-bot-go/database"
 	"passwork-me-bot-go/helper"
 	"passwork-me-bot-go/models"
+	"strconv"
 	"strings"
 )
 
@@ -57,6 +59,87 @@ func GetUserById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	io.WriteString(w, string(data))
+}
+
+func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	vars := mux.Vars(r)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if vars["id"] == "" {
+		httpJsonException(w, "Вы не передали параметр id", http.StatusNotFound)
+		return
+	}
+
+	db := database.Instant()
+	db.Model(&models.User{}).Where("id = ?", vars["id"]).Find(&user)
+
+	decoder := json.NewDecoder(r.Body)
+	var varsBody map[string]interface{}
+
+	err := decoder.Decode(&varsBody)
+	if err != nil {
+		panic(err)
+	}
+
+	if varsBody["roles"] == nil || len(varsBody["roles"].([]interface{})) == 0 {
+		httpJsonException(w, "Вы не передали роли", http.StatusNotFound)
+		return
+	}
+
+	_roles := varsBody["roles"].([]interface{})
+	var roles []string
+	fmt.Println(_roles)
+	for _, ro := range _roles {
+		roles = append(roles, strconv.Itoa(int(ro.(float64))))
+	}
+
+	var _result []map[string]interface{}
+	var rolesExists []string
+	var rolesDeleted []string
+	var rolesNotExists []string
+
+	db.Raw("SELECT id FROM user_roles WHERE role_id in (?) and user_id = ?", roles, user.ID).Scan(&_result)
+	for _, role := range _result {
+		rolesExists = append(rolesExists, role["id"].(string))
+	}
+
+	for _, role := range _result {
+		ex := false
+		for _, rol := range roles {
+			if rol == role["id"].(string) {
+				ex = true
+			}
+		}
+
+		if !ex {
+			rolesDeleted = append(rolesDeleted, role["id"].(string))
+		}
+	}
+
+	rolesExists = helper.Unique(rolesExists)
+
+	for _, role := range roles {
+		ex := false
+		for _, rol := range rolesExists {
+			if rol == role {
+				ex = true
+			}
+		}
+
+		if !ex {
+			rolesNotExists = append(rolesNotExists, role)
+		}
+	}
+
+	for _, role := range rolesNotExists {
+		db.Exec("INSERT INTO user_roles (role_id, user_id) VALUES (?, ?)", role, user.ID)
+	}
+
+	for _, role := range rolesDeleted {
+		db.Exec("DELETE FROM user_roles WHERE role_id = ? AND user_id = ?", role, user.ID)
+	}
 }
 
 func GetGroups(w http.ResponseWriter, r *http.Request) {

@@ -20,6 +20,43 @@
                 <v-row justify="center">
                     <v-col key="1">
                         <v-data-table :headers="headerUsers" :items="users" :items-per-page="5" class="elevation-1">
+                            <template v-slot:top>
+                                <v-toolbar flat >
+                                    <v-toolbar-title>Пользователи</v-toolbar-title>
+                                    <v-divider class="mx-4" inset vertical></v-divider>
+                                    <v-spacer></v-spacer>
+                                    <v-dialog v-model="dialogEditedUser" max-width="500px">
+                                        <v-card>
+                                            <v-card-title>
+                                                <span class="text-h5">Заголовок</span>
+                                            </v-card-title>
+
+                                            <v-card-text>
+                                                <v-container>
+                                                    <v-row>
+                                                        <v-col cols="12" >
+                                                            <v-textarea
+                                                                    v-model="userItem.roles"
+                                                                    label="Роли через запятую"
+                                                            ></v-textarea>
+                                                        </v-col>
+                                                    </v-row>
+                                                </v-container>
+                                            </v-card-text>
+
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn color="blue darken-1" text @click="closeEditedUser" >
+                                                    Отмена
+                                                </v-btn>
+                                                <v-btn color="blue darken-1" text @click="saveUser" >
+                                                    Сохранить
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                </v-toolbar>
+                            </template>
                             <template v-slot:item.roles="{ item }">
                                 <v-chip v-for="role in item.roles" color="blue lighten-1" dark small>
                                     ${ role.name }
@@ -32,6 +69,10 @@
                             </template>
                         </v-data-table>
                     </v-col>
+
+
+
+
                     <v-col key="2">
                         <v-data-table :headers="headerRoles" :items="roles" :items-per-page="5" class="elevation-1">
                             <template v-slot:top>
@@ -39,7 +80,7 @@
                                     <v-toolbar-title>Роли</v-toolbar-title>
                                     <v-divider class="mx-4" inset vertical></v-divider>
                                     <v-spacer></v-spacer>
-                                    <v-dialog v-model="dialog" max-width="500px">
+                                    <v-dialog v-model="dialogEditedRole" max-width="500px">
                                         <template v-slot:activator="{ on, attrs }">
                                             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                                                 Добавить роль
@@ -53,11 +94,19 @@
                                             <v-card-text>
                                                 <v-container>
                                                     <v-row>
-                                                        <v-col cols="12" sm="6" md="4" >
+                                                        <v-col cols="12">
                                                             <v-text-field
                                                                     v-model="roleItem.name"
                                                                     label="Наименование роли"
                                                             ></v-text-field>
+                                                        </v-col>
+                                                    </v-row>
+                                                    <v-row>
+                                                        <v-col cols="12">
+                                                            <v-textarea
+                                                                    v-model="roleItem.permissions"
+                                                                    label="Права через запятую"
+                                                            ></v-textarea>
                                                         </v-col>
                                                     </v-row>
                                                 </v-container>
@@ -65,21 +114,21 @@
 
                                             <v-card-actions>
                                                 <v-spacer></v-spacer>
-                                                <v-btn color="blue darken-1" text @click="close" >
+                                                <v-btn color="blue darken-1" text @click="closeEditedRole" >
                                                     Отмена
                                                 </v-btn>
-                                                <v-btn color="blue darken-1" text @click="save" >
+                                                <v-btn color="blue darken-1" text @click="saveRole" >
                                                     Сохранить
                                                 </v-btn>
                                             </v-card-actions>
                                         </v-card>
                                     </v-dialog>
-                                    <v-dialog v-model="dialogDelete" max-width="500px">
+                                    <v-dialog v-model="dialogDeleteRole" max-width="500px">
                                         <v-card>
                                             <v-card-title class="text-h5">Вы уверены, что хотите удалить роль?</v-card-title>
                                             <v-card-actions>
                                                 <v-spacer></v-spacer>
-                                                <v-btn color="blue darken-1" text @click="closeDelete">Отмена</v-btn>
+                                                <v-btn color="blue darken-1" text @click="closeDeleteRole">Отмена</v-btn>
                                                 <v-btn color="blue darken-1" text @click="deleteRoleConfirm">Да</v-btn>
                                                 <v-spacer></v-spacer>
                                             </v-card-actions>
@@ -102,6 +151,10 @@
                             </template>
                         </v-data-table>
                     </v-col>
+
+
+
+
                     <v-col key="3">
                         <v-data-table :headers="headerGroups" :items="groups" :items-per-page="5" class="elevation-1">
 
@@ -121,29 +174,55 @@
         methods: {
             editRole (item) {
                 this.editedRoleObj = item
-                this.editedRole = Object.assign({}, item)
-                this.dialog = true
+                this.dialogEditedRole = true
             },
             editUser (item) {
-                console.log('edit user')
+                this.editedUserObj = item
+                roleNames = []
+                item.roles.forEach(r => roleNames.push(r.name))
+                this.userItem.roles = roleNames.join(", ")
+                this.dialogEditedUser = true
+            },
+            saveUser (item) {
+                obj = this.editedUserObj
+                roleNames = this.userItem.roles.split(", ")
+                roles = this.roles.filter(role => roleNames.includes(role.name))
+                rolesIds = []
+                roles.forEach(r => rolesIds.push(r.id))
+                axios.patch('/api/users/'+obj.id, {
+                    roles: rolesIds,
+                })
+                .then(function (response) {
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+                this.closeEditedUser()
+            },
+            closeEditedUser (item) {
+                this.dialogEditedUser = false
+                this.$nextTick(() => {
+                    this.editedUserObj = null
+                    this.userItem.roles = ""
+                })
             },
             deleteRole (item) {
                 this.editedRoleObj = item
-                this.editedRole = Object.assign({}, item)
-                this.dialogDelete = true
+                this.dialogDeleteRole = true
             },
             deleteRoleConfirm () {
                 console.log('delete role')
-                this.closeDelete()
+                this.closeDeleteRole()
             },
-            close () {
-                this.dialog = false
-                // this.$nextTick(() => {
-                //     this.editedItem = Object.assign({}, this.defaultItem)
-                //     this.editedIndex = -1
-                // })
+            closeEditedRole () {
+                this.dialogEditedRole = false
+                this.$nextTick(() => {
+                    this.editedRoleObj = null
+                    this.roleItem.name = ""
+                })
             },
-            save () {
+            saveRole () {
                 axios.post('/api/roles/create', {
                     name: this.roleItem.name,
                 })
@@ -153,15 +232,14 @@
                 .catch(function (error) {
                     console.log(error);
                 });
-                this.roleItem.name = ""
-                this.close()
+                this.closeEditedRole()
+                this.initialize()
             },
-            closeDelete () {
-                this.dialogDelete = false
-                // this.$nextTick(() => {
-                //     this.editedRole = Object.assign({}, this.defaultItem)
-                //     this.editedRoleObj = null
-                // })
+            closeDeleteRole () {
+                this.dialogDeleteRole = false
+                this.$nextTick(() => {
+                    this.editedRoleObj = null
+                })
             },
             getGroupPermissionName(group) {
                 return group.group_is_vault ? this.vaultPermissions[group.permission] : this.folderPermissions[group.permission]
@@ -190,22 +268,31 @@
            this.initialize()
         },
         watch: {
-            dialog (val) {
-                val || this.close()
+            dialogEditedUser (val) {
+                val || this.closeEditedUser()
             },
-            dialogDelete (val) {
-                val || this.closeDelete()
+            dialogEditedRole (val) {
+                val || this.closeEditedRole()
+            },
+            dialogDeleteRole (val) {
+                val || this.closeDeleteRole()
             },
         },
         data() {
             return {
-                dialog: false,
-                dialogDelete: false,
+                dialogEditedUser: false,
+                dialogEditedRole: false,
+                dialogDeleteRole: false,
                 editedRoleObj: null,
+                editedUserObj: null,
                 vaultPermissions: [],
                 folderPermissions: [],
                 roleItem: {
                     name: '',
+                    permissions: ''
+                },
+                userItem: {
+                    roles: "",
                 },
                 headerUsers: [
                     {

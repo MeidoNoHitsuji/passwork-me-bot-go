@@ -21,6 +21,7 @@ func New() *mux.Router {
 	usersRouter := apiRouter.PathPrefix("/users").Subrouter()
 	usersRouter.HandleFunc("", GetUsers).Methods("GET")
 	usersRouter.HandleFunc("/{id}", GetUserById).Methods("GET")
+	usersRouter.HandleFunc("/{id}", UpdateUserByID).Methods("PATCH")
 
 	groupsRouter := apiRouter.PathPrefix("/groups").Subrouter()
 	groupsRouter.HandleFunc("", GetGroups).Methods("GET")
