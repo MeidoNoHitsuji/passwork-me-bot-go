@@ -7,23 +7,247 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-</head>
-<body>
-    <div id="app">
-        <v-app>
-            <v-main>
-                <v-container>Hello world</v-container>
-            </v-main>
-        </v-app>
-    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-    <script>
-        new Vue({
-            el: '#app',
-            vuetify: new Vuetify(),
-        })
-    </script>
+</head>
+<body>
+<div id="app">
+    <v-app>
+        <v-main>
+            <v-container class="grey lighten-5 mb-6">
+                <v-row justify="center">
+                    <v-col key="1">
+                        <v-data-table :headers="headerUsers" :items="users" :items-per-page="5" class="elevation-1">
+                            <template v-slot:item.roles="{ item }">
+                                <v-chip v-for="role in item.roles" color="blue lighten-1" dark small>
+                                    ${ role.name }
+                                </v-chip>
+                            </template>
+                            <template v-slot:item.actions="{ item }">
+                                <v-icon small @click="editUser(item)">
+                                    mdi-pencil
+                                </v-icon>
+                            </template>
+                        </v-data-table>
+                    </v-col>
+                    <v-col key="2">
+                        <v-data-table :headers="headerRoles" :items="roles" :items-per-page="5" class="elevation-1">
+                            <template v-slot:top>
+                                <v-toolbar flat >
+                                    <v-toolbar-title>Роли</v-toolbar-title>
+                                    <v-divider class="mx-4" inset vertical></v-divider>
+                                    <v-spacer></v-spacer>
+                                    <v-dialog v-model="dialog" max-width="500px">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
+                                                Добавить роль
+                                            </v-btn>
+                                        </template>
+                                        <v-card>
+                                            <v-card-title>
+                                                <span class="text-h5">Заголовок</span>
+                                            </v-card-title>
+
+                                            <v-card-text>
+                                                <v-container>
+                                                    <v-row>
+                                                        <v-col cols="12" sm="6" md="4" >
+                                                            <v-text-field
+                                                                    v-model="roleItem.name"
+                                                                    label="Наименование роли"
+                                                            ></v-text-field>
+                                                        </v-col>
+                                                    </v-row>
+                                                </v-container>
+                                            </v-card-text>
+
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn color="blue darken-1" text @click="close" >
+                                                    Отмена
+                                                </v-btn>
+                                                <v-btn color="blue darken-1" text @click="save" >
+                                                    Сохранить
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                    <v-dialog v-model="dialogDelete" max-width="500px">
+                                        <v-card>
+                                            <v-card-title class="text-h5">Вы уверены, что хотите удалить роль?</v-card-title>
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn color="blue darken-1" text @click="closeDelete">Отмена</v-btn>
+                                                <v-btn color="blue darken-1" text @click="deleteRoleConfirm">Да</v-btn>
+                                                <v-spacer></v-spacer>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-dialog>
+                                </v-toolbar>
+                            </template>
+                            <template v-slot:item.groups="{ item }">
+                                <v-chip v-for="group in item.groups" color="blue lighten-1" dark small>
+                                    ${group.group_name}:${getGroupPermissionName(group)}
+                                </v-chip>
+                            </template>
+                            <template v-slot:item.actions="{ item }">
+                                <v-icon small class="mr-2" @click="editRole(item)">
+                                    mdi-pencil
+                                </v-icon>
+                                <v-icon small @click="deleteRole(item)" >
+                                    mdi-delete
+                                </v-icon>
+                            </template>
+                        </v-data-table>
+                    </v-col>
+                    <v-col key="3">
+                        <v-data-table :headers="headerGroups" :items="groups" :items-per-page="5" class="elevation-1">
+
+                        </v-data-table>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-main>
+    </v-app>
+</div>
+
+<script>
+    var vm = new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],
+        vuetify: new Vuetify(),
+        methods: {
+            editRole (item) {
+                this.editedRoleObj = item
+                this.editedRole = Object.assign({}, item)
+                this.dialog = true
+            },
+            editUser (item) {
+                console.log('edit user')
+            },
+            deleteRole (item) {
+                this.editedRoleObj = item
+                this.editedRole = Object.assign({}, item)
+                this.dialogDelete = true
+            },
+            deleteRoleConfirm () {
+                console.log('delete role')
+                this.closeDelete()
+            },
+            close () {
+                this.dialog = false
+                // this.$nextTick(() => {
+                //     this.editedItem = Object.assign({}, this.defaultItem)
+                //     this.editedIndex = -1
+                // })
+            },
+            save () {
+                axios.post('/api/roles/create', {
+                    name: this.roleItem.name,
+                })
+                .then(function (response) {
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+                this.roleItem.name = ""
+                this.close()
+            },
+            closeDelete () {
+                this.dialogDelete = false
+                // this.$nextTick(() => {
+                //     this.editedRole = Object.assign({}, this.defaultItem)
+                //     this.editedRoleObj = null
+                // })
+            },
+            getGroupPermissionName(group) {
+                return group.group_is_vault ? this.vaultPermissions[group.permission] : this.folderPermissions[group.permission]
+            },
+            initialize() {
+                axios
+                    .get('/api/users')
+                    .then(response => (this.users = response.data))
+
+                axios
+                    .get('api/groups')
+                    .then(response => (this.groups = response.data))
+
+                axios
+                    .get('/api/roles')
+                    .then(response => (this.roles = response.data))
+                axios
+                    .get('/api/permissions/vault')
+                    .then(response => (this.vaultPermissions = response.data))
+                axios
+                    .get('/api/permissions/folder')
+                    .then(response => (this.folderPermissions = response.data))
+            }
+        },
+        created() {
+           this.initialize()
+        },
+        watch: {
+            dialog (val) {
+                val || this.close()
+            },
+            dialogDelete (val) {
+                val || this.closeDelete()
+            },
+        },
+        data() {
+            return {
+                dialog: false,
+                dialogDelete: false,
+                editedRoleObj: null,
+                vaultPermissions: [],
+                folderPermissions: [],
+                roleItem: {
+                    name: '',
+                },
+                headerUsers: [
+                    {
+                        text: 'Имя пользователя',
+                        align: 'start',
+                        sortable: false,
+                        value: 'email',
+                    },
+                    {text: 'ID', value: 'id'},
+                    {text: 'Имя', value: 'name'},
+                    {text: 'Роли', value: 'roles', sortable: false },
+                    {text: 'Действия', value: 'actions', sortable: false },
+                ],
+                headerRoles: [
+                    {
+                        text: 'Название роли',
+                        align: 'start',
+                        sortable: false,
+                        value: 'name',
+                    },
+                    {text: 'ID', value: 'id'},
+                    {text: 'Права', value: 'groups', sortable: false },
+                    {text: 'Действия', value: 'actions', sortable: false },
+                ],
+                headerGroups: [
+                    {
+                        text: 'Название группы',
+                        align: 'start',
+                        sortable: false,
+                        value: 'name',
+                    },
+                    {text: 'ID', value: 'id'},
+                    {text: 'Имя', value: 'name'},
+                    {text: 'ID родительской группы', value: 'parent_id'},
+                ],
+
+                roles: [],
+                groups: [],
+                users: [],
+            }
+        },
+    })
+</script>
 </body>
 </html>

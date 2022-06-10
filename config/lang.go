@@ -1,6 +1,6 @@
 package config
 
-var PermissionName = map[string]string{
+var PermissionName = map[int]string{
 	NoAccess:            "No access",
 	ListingAccess:       "Folder listing",
 	ReadAccess:          "Read only",
@@ -8,5 +8,5 @@ var PermissionName = map[string]string{
 	FullAccess:          "Full access",
 	AdministratorAccess: "Administrator",
 	InheritedAccess:     "Inherited from parent",
-	RemoveAccess:        "Remove",
+	//RemoveAccess:        "Remove",
 }

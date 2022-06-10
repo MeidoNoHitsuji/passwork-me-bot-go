@@ -14,12 +14,3 @@ var DB = map[string]string{
 	"user":     "",
 	"password": "",
 }
-
-var PermissionValue = map[string]string{
-	NoAccess:            "denied",
-	ListingAccess:       "listing",
-	ReadAccess:          "read",
-	EditAccess:          "write",
-	FullAccess:          "delete",
-	AdministratorAccess: "admin",
-}

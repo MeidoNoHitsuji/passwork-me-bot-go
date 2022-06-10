@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"net/url"
+	"passwork-me-bot-go/config"
 	"strings"
 )
 
@@ -22,13 +23,45 @@ func Unique(arr []string) []string {
 	return list
 }
 
-func Contains(arr []any, val any) bool {
+func Contains(arr []string, val string) bool {
 	for _, a := range arr {
 		if a == val {
 			return true
 		}
 	}
 	return false
+}
+
+func GetPermissions(toVault bool) []string {
+	var permissions []string
+
+	if toVault {
+		for _, p := range config.VaultPermission {
+			permissions = append(permissions, p)
+		}
+	} else {
+		for _, p := range config.FolderPermission {
+			permissions = append(permissions, p)
+		}
+	}
+
+	return permissions
+}
+
+func GetPermissionsKeys(toVault bool) []int {
+	var permissions []int
+
+	if toVault {
+		for key, _ := range config.VaultPermission {
+			permissions = append(permissions, key)
+		}
+	} else {
+		for key, _ := range config.FolderPermission {
+			permissions = append(permissions, key)
+		}
+	}
+
+	return permissions
 }
 
 func TransferToParentheses(values url.Values) url.Values {

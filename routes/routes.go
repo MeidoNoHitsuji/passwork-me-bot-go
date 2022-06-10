@@ -20,12 +20,20 @@ func New() *mux.Router {
 
 	usersRouter := apiRouter.PathPrefix("/users").Subrouter()
 	usersRouter.HandleFunc("", GetUsers).Methods("GET")
-	usersRouter.HandleFunc("/", GetUsers).Methods("GET")
 	usersRouter.HandleFunc("/{id}", GetUserById).Methods("GET")
-	usersRouter.HandleFunc("/{id}/", GetUserById).Methods("GET")
 
-	apiRouter.HandleFunc("/groups", GetGroups).Methods("GET")
-	apiRouter.HandleFunc("/roles", GetRoles).Methods("GET")
+	groupsRouter := apiRouter.PathPrefix("/groups").Subrouter()
+	groupsRouter.HandleFunc("", GetGroups).Methods("GET")
+
+	rolesRouter := apiRouter.PathPrefix("/roles").Subrouter()
+	rolesRouter.HandleFunc("", GetRoles).Methods("GET")
+	rolesRouter.HandleFunc("/create", CreateRole).Methods("POST")
+	rolesRouter.HandleFunc("/{id}", GetRoleById).Methods("GET")
+	rolesRouter.HandleFunc("/{id}", UpdateRole).Methods("PATCH")
+
+	permissionsRouter := apiRouter.PathPrefix("/permissions").Subrouter()
+	permissionsRouter.HandleFunc("/vault", GetVaultPermissions).Methods("GET")
+	permissionsRouter.HandleFunc("/folder", GetFolderPermissions).Methods("GET")
 
 	router.HandleFunc("/", WebIndex).Methods("GET")
 
